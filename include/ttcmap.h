@@ -25,6 +25,22 @@ typedef struct
 
 typedef struct
 {
+    TT_UInt16 format;
+    TT_UInt16 length;
+    TT_UInt16 language;
+    TT_UInt16 segCountX2;
+    TT_UInt16 searchRange;
+    TT_UInt16 entrySelector;
+    TT_UInt16 rangeShift;
+    TT_UInt16 *endCode;
+    TT_UInt16 reservedPad;
+    TT_UInt16 *startCode;
+    TT_Int16 *idDelta;
+    TT_UInt16 *idRangeOffset;
+    TT_UInt16 *glyphIndexArray;
+
+    TT_UInt16 segCount;
+    TT_UInt glyphIndexOffset;
 } TT_Table_Cmap_Sub4;
 
 typedef struct
@@ -38,8 +54,15 @@ typedef struct
 } TT_Table_Cmap_Sub6;
 
 // skip format, it has been read!
-void Cmap_Read(TT_Table_Cmap_Sub6 *sub6, FILE *fp);
+void Cmap_Read_4(TT_Table_Cmap_Sub4 *sub4, FILE *fp);
 
-int Cmap_GetGlyph(TT_Table_Cmap_Sub6 *sub6, TT_ULong code);
+int Cmap_GetGlyph_4(TT_Table_Cmap_Sub4 *sub4, FILE *fp, TT_ULong code);
+
+void Cmap_Free_4(TT_Table_Cmap_Sub4 *sub4);
+
+// skip format, it has been read!
+void Cmap_Read_6(TT_Table_Cmap_Sub6 *sub6, FILE *fp);
+
+int Cmap_GetGlyph_6(TT_Table_Cmap_Sub6 *sub6, TT_ULong code);
 
 #endif

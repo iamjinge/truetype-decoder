@@ -49,7 +49,13 @@ void readCmap(TT_Font *font, FILE *fp)
         {
             sub->subType = SUB_6;
             sub->body = malloc(sizeof(TT_Table_Cmap_Sub6));
-            Cmap_Read((TT_Table_Cmap_Sub6 *)(sub->body), fp);
+            Cmap_Read_6((TT_Table_Cmap_Sub6 *)(sub->body), fp);
+        }
+        else if (format == 4)
+        {
+            sub->subType = SUB_4;
+            sub->body = malloc(sizeof(TT_Table_Cmap_Sub4));
+            Cmap_Read_4(sub->body, fp);
         }
         printf("\t%d\n", format);
         fseek(fp, old, SEEK_SET);
@@ -212,10 +218,18 @@ int TT_Get_Char_Index(TT_Font *font, FILE *fp, long code)
 
     for (int i = 0; i < cmap->numberSubtables; i++)
     {
-        if (cmap->subTables[i].subType == SUB_6)
+        int index;
+        switch (cmap->subTables[i].subType)
         {
-            TT_Table_Cmap_Sub6 *sub6 = cmap->subTables[i].body;
-            int index = Cmap_GetGlyph(sub6, code);
+        case SUB_4:
+            index = Cmap_GetGlyph_4(cmap->subTables[i].body, fp, code);
+            break;
+        case SUB_6:
+            index = Cmap_GetGlyph_6(cmap->subTables[i].body, code);
+            break;
+        }
+        if (index > 0)
+        {
             printf("get char index for %ld, %d\n", code, index);
             return index;
         }
@@ -274,7 +288,7 @@ void freeCmap(TT_Table_Cmap *cmap)
         switch (cmap->subTables[i].subType)
         {
         case 4:
-            // TODO release cmap for format 4
+            Cmap_Free_4(cmap->subTables[i].body);
             break;
         case 6:
             free(((TT_Table_Cmap_Sub6 *)(cmap->subTables[i].body))->glyphIndexArray);

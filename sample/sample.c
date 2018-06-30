@@ -11,7 +11,7 @@ void testRead()
     TT_Font font;
     TT_Glyph glyph;
     TT_New_Font(&font, fp);
-    int index = TT_Get_Char_Index(&font, fp, 'B');
+    int index = TT_Get_Char_Index(&font, fp, L'二');
     TT_Get_Glyph(&font, fp, &glyph, index);
 
     TT_Done(&font);
