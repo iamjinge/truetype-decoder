@@ -64,16 +64,17 @@ typedef struct
     TT_UInt16 rangeShift;
     TT_Table *tables;
 
+    TT_Stream *stream;
+
     TT_Table_Head *head;
     TT_Table_Cmap *cmap;
 } TT_Font;
 
+void TT_New_Font(TT_Font *font, const char *filename);
 
-void TT_New_Font(TT_Font *font, FILE *fp);
+int TT_Get_Char_Index(TT_Font *font, long code);
 
-int TT_Get_Char_Index(TT_Font *font, FILE *fp, long code);
-
-TT_Error TT_Get_Glyph(TT_Font *font, FILE *fp, TT_Glyph *glyph, int index);
+TT_Error TT_Get_Glyph(TT_Font *font, TT_Glyph *glyph, int index);
 
 void TT_Done(TT_Font *font);
 

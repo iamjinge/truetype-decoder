@@ -21,7 +21,8 @@ typedef unsigned long   TT_ULong;
 #include <stdlib.h>
 #include <stdio.h>
 
-#include <file_reader.h>
+// #include <file_reader.h>
+#include <ttstream.h>
 #include <tterr.h>
 
 #endif

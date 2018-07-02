@@ -54,14 +54,14 @@ typedef struct
 } TT_Table_Cmap_Sub6;
 
 // skip format, it has been read!
-void Cmap_Read_4(TT_Table_Cmap_Sub4 *sub4, FILE *fp);
+void Cmap_Read_4(TT_Table_Cmap_Sub4 *sub4, TT_Stream *fp);
 
-int Cmap_GetGlyph_4(TT_Table_Cmap_Sub4 *sub4, FILE *fp, TT_ULong code);
+int Cmap_GetGlyph_4(TT_Table_Cmap_Sub4 *sub4, TT_Stream *fp, TT_ULong code);
 
 void Cmap_Free_4(TT_Table_Cmap_Sub4 *sub4);
 
 // skip format, it has been read!
-void Cmap_Read_6(TT_Table_Cmap_Sub6 *sub6, FILE *fp);
+void Cmap_Read_6(TT_Table_Cmap_Sub6 *sub6, TT_Stream *fp);
 
 int Cmap_GetGlyph_6(TT_Table_Cmap_Sub6 *sub6, TT_ULong code);
 

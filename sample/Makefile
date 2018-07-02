@@ -2,7 +2,7 @@
 CC = gcc
 CXX = g++
 
-SRC_FILES = ../src/file_reader.c \
+SRC_FILES = ../src/ttstream.c \
 			../src/ttfont.c \
 			../src/ttcmap.c
 

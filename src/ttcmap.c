@@ -22,7 +22,7 @@ int findEndCodeIndex(TT_UInt16 target, TT_UInt16 *array, int length)
         return -1;
 }
 
-void Cmap_Read_4(TT_Table_Cmap_Sub4 *sub4, FILE *fp)
+void Cmap_Read_4(TT_Table_Cmap_Sub4 *sub4, TT_Stream *fp)
 {
     sub4->length = readUInt16(fp);
     sub4->language = readUInt16(fp);
@@ -54,10 +54,10 @@ void Cmap_Read_4(TT_Table_Cmap_Sub4 *sub4, FILE *fp)
     {
         sub4->idRangeOffset[i] = readUInt16(fp);
     }
-    sub4->glyphIndexOffset = ftell(fp);
+    sub4->glyphIndexOffset = tttell(fp);
 }
 
-int Cmap_GetGlyph_4(TT_Table_Cmap_Sub4 *sub4, FILE *fp, TT_ULong code)
+int Cmap_GetGlyph_4(TT_Table_Cmap_Sub4 *sub4, TT_Stream *fp, TT_ULong code)
 {
     int endCodeIndex = findEndCodeIndex(code, sub4->endCode, sub4->segCount);
     if (endCodeIndex < 0 || endCodeIndex >= sub4->segCount - 1)
@@ -93,7 +93,7 @@ void Cmap_Free_4(TT_Table_Cmap_Sub4 *sub4)
 }
 
 /*  functions for format 6  */
-void Cmap_Read_6(TT_Table_Cmap_Sub6 *sub6, FILE *fp)
+void Cmap_Read_6(TT_Table_Cmap_Sub6 *sub6, TT_Stream *fp)
 {
     sub6->length = readUInt16(fp);
     sub6->language = readUInt16(fp);
