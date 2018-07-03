@@ -25,6 +25,7 @@ typedef struct
 #include <ttdef.h>
 #include <stdio.h>
 
+void ttopenToMem(TT_Stream *stream, const char *filename);
 void ttopen(TT_Stream *stream, const char *filename);
 size_t ttread(void *result, size_t size, size_t nitems, TT_Stream *stream);
 void ttclose(TT_Stream *stream);

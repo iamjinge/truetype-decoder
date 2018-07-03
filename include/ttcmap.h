@@ -6,12 +6,13 @@
 enum
 {
     // only support format 4 and 6!
-    SUB_0,
-    SUB_2,
-    SUB_4,
-    SUB_6,
-    SUB_8,
-    SUB_10,
+    TT_Cmap_SUB_Invalid,
+    TT_Cmap_SUB_0,
+    TT_Cmap_SUB_2,
+    TT_Cmap_SUB_4,
+    TT_Cmap_SUB_6,
+    TT_Cmap_SUB_8,
+    TT_Cmap_SUB_10,
 };
 
 typedef struct
@@ -56,7 +57,7 @@ typedef struct
 // skip format, it has been read!
 void Cmap_Read_4(TT_Table_Cmap_Sub4 *sub4, TT_Stream *fp);
 
-int Cmap_GetGlyph_4(TT_Table_Cmap_Sub4 *sub4, TT_Stream *fp, TT_ULong code);
+int Cmap_GetGlyph_4(TT_Table_Cmap_Sub4 *sub4, TT_ULong code);
 
 void Cmap_Free_4(TT_Table_Cmap_Sub4 *sub4);
 

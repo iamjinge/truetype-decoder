@@ -53,6 +53,7 @@ typedef struct
     TT_FWord yMin;
     TT_FWord xMax;
     TT_FWord yMax;
+    TT_UInt offset;
 } TT_Glyph;
 
 typedef struct
@@ -70,11 +71,22 @@ typedef struct
     TT_Table_Cmap *cmap;
 } TT_Font;
 
-void TT_New_Font(TT_Font *font, const char *filename);
+typedef struct
+{
+    void *user;
+    void (*MoveToFunc)(TT_Point *, void *);
+    void (*LineToFunc)(TT_Point *, void *);
+    void (*QuadToFunc)(TT_Point *, TT_Point *, void *);
+    void (*CubicToFunc)(TT_Point *, TT_Point *, TT_Point *, void *);
+} TT_Decompose_Funcs;
+
+TT_Error TT_New_Font(TT_Font *font, const char *filename);
 
 int TT_Get_Char_Index(TT_Font *font, long code);
 
 TT_Error TT_Get_Glyph(TT_Font *font, TT_Glyph *glyph, int index);
+
+TT_Error TT_Decompose_Glyph(TT_Font *font, TT_Glyph *glyph, TT_Decompose_Funcs *callback);
 
 void TT_Done(TT_Font *font);
 

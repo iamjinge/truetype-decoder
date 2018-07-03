@@ -3,6 +3,20 @@
 #include <stdlib.h>
 #include <string.h>
 
+void ttopenToMem(TT_Stream *stream, const char *filename)
+{
+    stream->type = TT_Stream_Type_Memory;
+    stream->fp = NULL;
+    FILE *fp = fopen(filename, "rb");
+    stream->pos = 0;
+    fseek(fp, 0, SEEK_END);
+    stream->size = ftell(fp);
+    fseek(fp, 0, SEEK_SET);
+    stream->base = malloc(stream->size);
+    fread(stream->base, 1, stream->size, fp);
+    fclose(fp);
+}
+
 void ttopen(TT_Stream *stream, const char *filename)
 {
     stream->type = TT_Stream_Type_File;
@@ -18,7 +32,7 @@ size_t ttread(void *result, size_t size, size_t nitems, TT_Stream *stream)
     else
     {
         long allSize = size * nitems;
-        memcpy(stream->base + stream->pos, result, allSize);
+        void *after = memcpy(result, stream->base + stream->pos, allSize);
         stream->pos += allSize;
         return nitems;
     }
