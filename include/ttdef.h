@@ -18,6 +18,9 @@ typedef unsigned int    TT_Fixed; // 16.16
 typedef long            TT_Date;
 typedef unsigned long   TT_ULong;
 
+static TT_Fixed TT_Fixed_1 = 65536U; // 1 in TT_Fixed
+static TT_UInt TT_Size_Multi = 64; 
+
 #include <stdlib.h>
 #include <stdio.h>
 

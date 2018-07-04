@@ -29,8 +29,10 @@ void testRead()
     callback.LineToFunc = LineToFunc;
     callback.QuadToFunc = QuadToFunc;
     TT_New_Font(&font, filename);
+    TT_Set_Size(&font, 16);
     int index = TT_Get_Char_Index(&font, L'二');
     TT_Get_Glyph(&font, &glyph, index);
+    printf("glyph width %d\n", glyph.advanceWidth);
     TT_Decompose_Glyph(&font, &glyph, &callback);
     TT_Done(&font);
 }

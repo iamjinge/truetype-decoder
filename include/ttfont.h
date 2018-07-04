@@ -48,12 +48,39 @@ typedef struct
 
 typedef struct
 {
+    TT_Fixed version;
+    TT_FWord ascent;
+    TT_FWord descent;
+    TT_FWord lineGap;
+    TT_FWord advanceWidthMax;
+    TT_FWord minLeftSideBearing;
+    TT_FWord minRightSideBearing;
+    TT_FWord xMaxExtent;
+    TT_Int16 caretSlopeRise;
+    TT_Int16 caretSlopeRun;
+    TT_FWord caretOffset;
+    // 4 int16 reserved;
+    TT_Int16 metricDataFormat;
+    TT_UInt16 numOfLongHorMetrics;
+} TT_Table_Hhea;
+
+typedef struct
+{
+    TT_Fixed xScale;
+    TT_Fixed yScale;
+} TT_Font_Metrics;
+
+typedef struct
+{
     TT_Int16 numberOfContours;
     TT_FWord xMin;
     TT_FWord yMin;
     TT_FWord xMax;
     TT_FWord yMax;
     TT_UInt offset;
+
+    TT_UInt16 advanceWidth;
+    TT_Int16 leftSideBearing;
 } TT_Glyph;
 
 typedef struct
@@ -65,9 +92,13 @@ typedef struct
     TT_UInt16 rangeShift;
     TT_Table *tables;
 
+    TT_Font_Metrics metrics;
+
     TT_Stream *stream;
 
     TT_Table_Head *head;
+    TT_Table_Hhea *hhea;
+
     TT_Table_Cmap *cmap;
 } TT_Font;
 
@@ -81,6 +112,8 @@ typedef struct
 } TT_Decompose_Funcs;
 
 TT_Error TT_New_Font(TT_Font *font, const char *filename);
+
+void TT_Set_Size(TT_Font *font, TT_UInt size);
 
 int TT_Get_Char_Index(TT_Font *font, long code);
 

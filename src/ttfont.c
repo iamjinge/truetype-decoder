@@ -55,6 +55,29 @@ void readHeadTable(TT_Font *font)
            font->head->magicNumber, font->head->indexToLocFormat);
 }
 
+void readHheaTable(TT_Font *font)
+{
+    TT_Table *table = getTable(font, "hhea");
+    ttseek(font->stream, table->offset);
+    font->hhea = (TT_Table_Hhea *)malloc(sizeof(TT_Table_Hhea));
+    font->hhea->version = readFixed(font->stream);
+    font->hhea->ascent = readFWord(font->stream);
+    font->hhea->descent = readFWord(font->stream);
+    font->hhea->lineGap = readFWord(font->stream);
+    font->hhea->advanceWidthMax = readFWord(font->stream);
+    font->hhea->minLeftSideBearing = readFWord(font->stream);
+    font->hhea->minRightSideBearing = readFWord(font->stream);
+    font->hhea->xMaxExtent = readFWord(font->stream);
+    font->hhea->caretSlopeRise = readInt16(font->stream);
+    font->hhea->caretSlopeRun = readInt16(font->stream);
+    font->hhea->caretOffset = readFWord(font->stream);
+    // skip 4 int16 reserved;
+    ttseek(font->stream, tttell(font->stream) + 4 * sizeof(TT_Int16));
+    font->hhea->metricDataFormat = readInt16(font->stream);
+    font->hhea->numOfLongHorMetrics = readUInt16(font->stream);
+    printf("hhea: %u %u %u %u", font->hhea->ascent, font->hhea->descent, font->hhea->lineGap, font->hhea->numOfLongHorMetrics);
+}
+
 int glyphCount(TT_Font *font)
 {
     int old = tttell(font->stream);
@@ -83,17 +106,15 @@ void readCmap(TT_Font *font)
         sub->platformID = readUInt16(font->stream);
         sub->platformSpecificID = readUInt16(font->stream);
         sub->offset = readUInt(font->stream) + table->offset;
-        bool setSubInvalid = false;
         for (int j = i - 1; j >= 0; j--)
         {
             if (font->cmap->subTables[j].offset == sub->offset)
             {
-                sub->subType = TT_Cmap_SUB_Invalid;
-                setSubInvalid = true;
+                sub->subType = TT_Cmap_SUB_Repeat;
                 break;
             }
         }
-        if (setSubInvalid)
+        if (sub->subType == TT_Cmap_SUB_Repeat)
         {
             continue;
         }
@@ -138,6 +159,35 @@ int getGlyphOffset(TT_Font *font, int index)
     printf("get glyph offset %d\n", offset);
     TT_Table *glyf = getTable(font, "glyf");
     return offset + glyf->offset;
+}
+
+void getGlyphMetric(TT_Font *font, TT_Glyph *glyph, int index)
+{
+    TT_Table *table = getTable(font, "hmtx");
+    if (index < font->hhea->numOfLongHorMetrics)
+    {
+        ttseek(font->stream, table->offset + index * 4);
+        glyph->advanceWidth = readUInt16(font->stream);
+        glyph->leftSideBearing = readInt16(font->stream);
+    }
+    else
+    {
+        ttseek(font->stream, table->offset + (font->hhea->numOfLongHorMetrics - 1) * 4);
+        glyph->advanceWidth = readUInt16(font->stream);
+        ttseek(font->stream, table->offset + font->hhea->numOfLongHorMetrics * 4 +
+                                 (index - font->hhea->numOfLongHorMetrics) * 2);
+        glyph->leftSideBearing = readInt16(font->stream);
+    }
+}
+
+void scaleGlyph(TT_Font *font, TT_Glyph *glyph)
+{
+    glyph->xMin = glyph->xMin * font->metrics.xScale / TT_Fixed_1;
+    glyph->yMin = glyph->yMin * font->metrics.yScale / TT_Fixed_1;
+    glyph->xMax = glyph->xMax * font->metrics.xScale / TT_Fixed_1;
+    glyph->yMax = glyph->yMax * font->metrics.yScale / TT_Fixed_1;
+    glyph->advanceWidth = glyph->advanceWidth * font->metrics.xScale / TT_Fixed_1;
+    glyph->leftSideBearing = glyph->leftSideBearing * font->metrics.xScale / TT_Fixed_1;
 }
 
 void decomposeSimpleGlyph(TT_Font *font, TT_Glyph *glyph, TT_Decompose_Funcs *callback)
@@ -186,7 +236,7 @@ void decomposeSimpleGlyph(TT_Font *font, TT_Glyph *glyph, TT_Decompose_Funcs *ca
         value += (flags[i] & X_IS_BYTE)
                      ? ((flags[i] & X_DELTA) ? readUInt8(font->stream) : -readUInt8(font->stream))
                      : ((flags[i] & X_DELTA) ? 0 : readInt16(font->stream));
-        points[i].x = value;
+        points[i].x = value * font->metrics.xScale / TT_Fixed_1;
     }
 
     value = 0;
@@ -195,7 +245,7 @@ void decomposeSimpleGlyph(TT_Font *font, TT_Glyph *glyph, TT_Decompose_Funcs *ca
         value += (flags[i] & Y_IS_BYTE)
                      ? ((flags[i] & Y_DELTA) ? readUInt8(font->stream) : -readUInt8(font->stream))
                      : ((flags[i] & Y_DELTA) ? 0 : readInt16(font->stream));
-        points[i].y = value;
+        points[i].y = value * font->metrics.yScale / TT_Fixed_1;
     }
 
     printf("points: \n");
@@ -260,6 +310,8 @@ void decomposeSimpleGlyph(TT_Font *font, TT_Glyph *glyph, TT_Decompose_Funcs *ca
 
 TT_Error TT_New_Font(TT_Font *font, const char *filename)
 {
+    font->metrics.xScale = TT_Fixed_1;
+    font->metrics.yScale = TT_Fixed_1;
     font->stream = malloc(sizeof(TT_Stream));
     // ttopen(font->stream, filename);
     ttopenToMem(font->stream, filename);
@@ -287,10 +339,17 @@ TT_Error TT_New_Font(TT_Font *font, const char *filename)
     }
 
     readHeadTable(font);
+    readHheaTable(font);
 
     printf("glyph count %d\n", glyphCount(font));
     readCmap(font);
     return TT_Error_OK;
+}
+
+void TT_Set_Size(TT_Font *font, TT_UInt size)
+{
+    font->metrics.xScale = TT_Fixed_1 * TT_Size_Multi * size / font->head->unitsPerEm;
+    font->metrics.yScale = TT_Fixed_1 * TT_Size_Multi * size / font->head->unitsPerEm;
 }
 
 int TT_Get_Char_Index(TT_Font *font, long code)
@@ -335,6 +394,9 @@ TT_Error TT_Get_Glyph(TT_Font *font, TT_Glyph *glyph, int index)
     glyph->xMax = readFWord(font->stream);
     glyph->yMax = readFWord(font->stream);
     glyph->offset = tttell(font->stream);
+
+    getGlyphMetric(font, glyph, index);
+    scaleGlyph(font, glyph);
     printf("glyph: %d, %d, %d, %d, %d\n", glyph->numberOfContours,
            glyph->xMin, glyph->yMin, glyph->xMax, glyph->yMax);
     return TT_Error_OK;
@@ -365,6 +427,7 @@ void TT_Done(TT_Font *font)
     ttclose(font->stream);
     free(font->stream);
     free(font->head);
+    free(font->hhea);
     freeCmap(font->cmap);
 }
 

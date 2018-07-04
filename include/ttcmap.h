@@ -13,6 +13,7 @@ enum
     TT_Cmap_SUB_6,
     TT_Cmap_SUB_8,
     TT_Cmap_SUB_10,
+    TT_Cmap_SUB_Repeat,
 };
 
 typedef struct
@@ -41,7 +42,6 @@ typedef struct
     TT_UInt16 *glyphIndexArray;
 
     TT_UInt16 segCount;
-    TT_UInt glyphIndexOffset;
 } TT_Table_Cmap_Sub4;
 
 typedef struct

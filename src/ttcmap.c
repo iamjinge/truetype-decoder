@@ -52,7 +52,6 @@ void Cmap_Read_4(TT_Table_Cmap_Sub4 *sub4, TT_Stream *fp)
     {
         sub4->idRangeOffset[i] = readUInt16(fp);
     }
-    sub4->glyphIndexOffset = tttell(fp);
 }
 
 int Cmap_GetGlyph_4(TT_Table_Cmap_Sub4 *sub4, TT_ULong code)
@@ -87,7 +86,6 @@ void Cmap_Free_4(TT_Table_Cmap_Sub4 *sub4)
     free(sub4->startCode);
     free(sub4->idDelta);
     free(sub4->idRangeOffset);
-    free(sub4->glyphIndexArray);
 }
 
 /*  functions for format 6  */
